@@ -39,23 +39,7 @@
     const upload = document.getElementById("upload");
 
     const frameImg = new Image();
-    frameImg.src = "khung-avt.png";
+    frameImg.src = "khung-avt.png"; // Đảm bảo file này nằm cùng thư mục
 
     let userImg = new Image();
-    let dragging = false;
-    let lastX, lastY;
-
-    let imgCenterX = canvas.width / 2;
-    let imgCenterY = canvas.height / 2;
-    let scale = 1;
-
-    upload.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        userImg = new Image(); // Tạo mới tránh lỗi bộ nhớ
-        userImg.onload = () => {
-          scale = Math.min(canvas.width / userImg.width, canvas.height / userImg.height);
-          imgCenterX = canvas.width / 2;
-          imgCenterY = c
+    let dragging
