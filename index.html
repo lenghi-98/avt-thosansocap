@@ -1,45 +1,87 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <title>Đổi Khung Avatar OPPO</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #f0f2f5;
-      padding: 30px;
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const upload = document.getElementById("upload");
+
+  const frameImg = new Image();
+  frameImg.src = "khung-avt.png";
+
+  let userImg = new Image();
+  let dragging = false;
+  let lastX, lastY;
+
+  let imgCenterX = canvas.width / 2;
+  let imgCenterY = canvas.height / 2;
+  let scale = 1;
+
+  upload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      userImg = new Image();
+      userImg.onload = () => {
+        scale = Math.min(canvas.width / userImg.width, canvas.height / userImg.height);
+        imgCenterX = canvas.width / 2;
+        imgCenterY = canvas.height / 2;
+        drawCanvas();
+      };
+      userImg.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function drawCanvas() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (userImg.complete && userImg.naturalWidth !== 0) {
+      const drawWidth = userImg.width * scale;
+      const drawHeight = userImg.height * scale;
+      const drawX = imgCenterX - drawWidth / 2;
+      const drawY = imgCenterY - drawHeight / 2;
+      ctx.drawImage(userImg, drawX, drawY, drawWidth, drawHeight);
     }
-    canvas {
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      margin-top: 20px;
-      cursor: grab;
+    if (frameImg.complete) {
+      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
     }
-    input, button {
-      margin: 10px;
-      padding: 10px 20px;
-      font-size: 16px;
+  }
+
+  frameImg.onload = drawCanvas;
+
+  canvas.addEventListener("mousedown", (e) => {
+    dragging = true;
+    lastX = e.offsetX;
+    lastY = e.offsetY;
+    canvas.style.cursor = "grabbing";
+  });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (dragging) {
+      const dx = e.offsetX - lastX;
+      const dy = e.offsetY - lastY;
+      imgCenterX += dx;
+      imgCenterY += dy;
+      lastX = e.offsetX;
+      lastY = e.offsetY;
+      drawCanvas();
     }
-  </style>
-</head>
-<body>
-  <h1>🌟 Đổi Khung Avatar OPPO Reno14</h1>
-  <p>Tải ảnh của bạn lên và điều chỉnh vị trí / kích thước cho khớp khung.</p>
+  });
 
-  <input type="file" id="upload" accept="image/*">
-  <br>
-  <canvas id="canvas" width="768" height="768"></canvas>
-  <br>
-  <button onclick="downloadImage()">📥 Tải ảnh đã ghép</button>
+  canvas.addEventListener("mouseup", () => {
+    dragging = false;
+    canvas.style.cursor = "grab";
+  });
 
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const upload = document.getElementById("upload");
+  canvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+    scale = Math.max(0.1, scale + delta);
+    drawCanvas();
+  });
 
-    const frameImg = new Image();
-    frameImg.src = "khung-avt.png"; // Đảm bảo file này nằm cùng thư mục
-
-    let userImg = new Image();
-    let dragging
+  function downloadImage() {
+    const link = document.createElement("a");
+    link.download = "avatar_OPPO.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  }
+</script>
